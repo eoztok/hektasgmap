@@ -6,16 +6,15 @@
     <title>Hektaş</title>
     <script
       type="text/javascript"
-      src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap&libraries=drawing&v=weekly"
+      src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap&libraries=drawing"
       async
     ></script>
     <link rel="stylesheet" type="text/css" href="./style.css" />
     <script type="text/javascript">
-
-      var zoom = @(ViewBag.zoom);
-      var latitude = @(ViewBag.latitude);
-      var longitude = @(ViewBag.longitude);
-      var startedCoordinates = [@(ViewBag.coordinates)];
+      var zoom = 6;
+      var latitude = 34.703214;
+      var longitude = 39.26412412;
+      var startedCoordinates = [];
 
       var mode = 'create';
       var currentCoordinates = [];
@@ -56,7 +55,8 @@
         selectedColor = color;
         for (var i = 0; i < colors.length; ++i) {
           var currColor = colors[i];
-          colorButtons[currColor].style.border = currColor == color ? '2px solid #789' : '2px solid #fff';
+          colorButtons[currColor].style.border =
+            currColor == color ? '2px solid #789' : '2px solid #fff';
         }
 
         var polylineOptions = drawingManager.get('polylineOptions');
@@ -117,7 +117,7 @@
           disableDefaultUI: true,
           zoomControl: true,
           zoomControlOptions: {
-            position: google.maps.ControlPosition.TOP_RIGHT
+            position: google.maps.ControlPosition.TOP_RIGHT,
           },
         });
 
@@ -125,86 +125,100 @@
           strokeWeight: 0,
           fillOpacity: 0.45,
           editable: true,
-          draggable: true
+          draggable: true,
         };
 
         drawingManager = new google.maps.drawing.DrawingManager({
           drawingMode: google.maps.drawing.OverlayType.POLYGON,
           markerOptions: {
-            draggable: true
+            draggable: true,
           },
           polylineOptions: {
             editable: true,
-            draggable: true
+            draggable: true,
           },
           rectangleOptions: polyOptions,
           circleOptions: polyOptions,
           polygonOptions: polyOptions,
-          map: map
+          map: map,
         });
 
-        google.maps.event.addListener(drawingManager, 'overlaycomplete', function (e) {
-          var newShape = e.overlay;
+        google.maps.event.addListener(
+          drawingManager,
+          'overlaycomplete',
+          function (e) {
+            var newShape = e.overlay;
 
-          google.maps.event.addListener(newShape, 'dragend', (e) => {
-            updateCoordinates(newShape.latLngs.i[0].i);
-          });
-
-          var path = newShape.getPath();
-
-          google.maps.event.addListener(path, 'insert_at', (e) => {
-            updateCoordinates(newShape.latLngs.i[0].i);
-          });
-
-          google.maps.event.addListener(path, 'set_at', (e) => {
-            updateCoordinates(newShape.latLngs.i[0].i);
-          });
-
-          newShape.type = e.type;
-
-          if (e.type === google.maps.drawing.OverlayType.POLYGON) {
-
-            drawingManager.setDrawingMode(null);
-
-            google.maps.event.addListener(newShape, 'click', function (e) {
-              if (e.vertex !== undefined) {
-                if (newShape.type === google.maps.drawing.OverlayType.POLYGON) {
-                  var path = newShape.getPaths().getAt(e.path);
-                  path.removeAt(e.vertex);
-                  if (path.length < 3) {
-                    newShape.setMap(null);
-                  }
-                }
-                if (newShape.type === google.maps.drawing.OverlayType.POLYLINE) {
-                  var path = newShape.getPath();
-                  path.removeAt(e.vertex);
-                  if (path.length < 2) {
-                    newShape.setMap(null);
-                  }
-                }
-              }
-              setSelection(newShape);
+            google.maps.event.addListener(newShape, 'dragend', (e) => {
+              updateCoordinates(newShape.latLngs.i[0].i);
             });
-            setSelection(newShape);
-          }
 
-          if (newShape) {
-            updateCoordinates(newShape.latLngs.i[0].i);
-            updateLabel('edit');
-            drawingManager.setMap(null);
+            var path = newShape.getPath();
+
+            google.maps.event.addListener(path, 'insert_at', (e) => {
+              updateCoordinates(newShape.latLngs.i[0].i);
+            });
+
+            google.maps.event.addListener(path, 'set_at', (e) => {
+              updateCoordinates(newShape.latLngs.i[0].i);
+            });
+
+            newShape.type = e.type;
+
+            if (e.type === google.maps.drawing.OverlayType.POLYGON) {
+              drawingManager.setDrawingMode(null);
+
+              google.maps.event.addListener(newShape, 'click', function (e) {
+                if (e.vertex !== undefined) {
+                  if (
+                    newShape.type === google.maps.drawing.OverlayType.POLYGON
+                  ) {
+                    var path = newShape.getPaths().getAt(e.path);
+                    path.removeAt(e.vertex);
+                    if (path.length < 3) {
+                      newShape.setMap(null);
+                    }
+                  }
+                  if (
+                    newShape.type === google.maps.drawing.OverlayType.POLYLINE
+                  ) {
+                    var path = newShape.getPath();
+                    path.removeAt(e.vertex);
+                    if (path.length < 2) {
+                      newShape.setMap(null);
+                    }
+                  }
+                }
+                setSelection(newShape);
+              });
+              setSelection(newShape);
+            }
+
+            if (newShape) {
+              updateCoordinates(newShape.latLngs.i[0].i);
+              updateLabel('edit');
+              drawingManager.setMap(null);
+            }
           }
-        });
+        );
 
         drawingManager.setMap(null);
 
-        google.maps.event.addListener(drawingManager, 'drawingmode_changed', clearSelection);
+        google.maps.event.addListener(
+          drawingManager,
+          'drawingmode_changed',
+          clearSelection
+        );
         google.maps.event.addListener(map, 'click', clearSelection);
-        google.maps.event.addDomListener(document.getElementById('delete-button'), 'click', deleteSelectedShape);
+        google.maps.event.addDomListener(
+          document.getElementById('delete-button'),
+          'click',
+          deleteSelectedShape
+        );
 
         buildColorPalette();
 
         if (startedCoordinates.length > 0) {
-
           currentCoordinates = startedCoordinates.map((coordinate) => {
             return {
               lat: coordinate[0],
@@ -250,35 +264,41 @@
           updateLabel('edit');
         }
 
-        document.getElementById('submitButton').addEventListener('click', (event) => {
-          if (selectedShape || currentShape) {
-            // activeCreateMode();
+        document
+          .getElementById('submitButton')
+          .addEventListener('click', (event) => {
+            if (selectedShape || currentShape) {
+              // activeCreateMode();
 
-            saveCoordinates();
-          } else {
-            drawingManager.drawingControl = false;
-            drawingManager.setMap(map);
-            drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
+              saveCoordinates();
+            } else {
+              drawingManager.drawingControl = false;
+              drawingManager.setMap(map);
+              drawingManager.setDrawingMode(
+                google.maps.drawing.OverlayType.POLYGON
+              );
+
+              updateLabel('create');
+            }
+          });
+
+        document
+          .getElementById('resetButton')
+          .addEventListener('click', (event) => {
+            if (selectedShape) {
+              selectedShape.setMap(null);
+              selectedShape = null;
+            }
+
+            if (currentShape) {
+              currentShape.setMap(null);
+              currentShape = null;
+            }
+
+            drawingManager.setMap(null);
 
             updateLabel('create');
-          }
-        });
-
-        document.getElementById('resetButton').addEventListener('click', (event) => {
-          if (selectedShape) {
-            selectedShape.setMap(null);
-            selectedShape = null;
-          }
-
-          if (currentShape) {
-            currentShape.setMap(null);
-            currentShape = null;
-          }
-
-          drawingManager.setMap(null);
-
-          updateLabel('create');
-        });
+          });
       }
 
       function activeCreateMode() {
@@ -295,9 +315,11 @@
 
       function updateLabel(mode = 'create') {
         if (mode === 'create') {
-          document.getElementById('submitButton').innerHTML = '@(ViewBag.btnCiz)';
+          document.getElementById('submitButton').innerHTML =
+            '@(ViewBag.btnCiz)';
         } else if (mode === 'edit') {
-          document.getElementById('submitButton').innerHTML = '@(ViewBag.btnKaydet)';
+          document.getElementById('submitButton').innerHTML =
+            '@(ViewBag.btnKaydet)';
         }
       }
 
@@ -311,15 +333,16 @@
         });
       }
 
-
       function saveCoordinates() {
         if (window.Print !== undefined) {
-          Print.postMessage(JSON.stringify({
-            event: 'polygonCreated',
-            coordinates: currentCoordinates.map(function (currentCoordinate) {
-              return [currentCoordinate.lat, currentCoordinate.lng];
-            }),
-          }));
+          Print.postMessage(
+            JSON.stringify({
+              event: 'polygonCreated',
+              coordinates: currentCoordinates.map(function (currentCoordinate) {
+                return [currentCoordinate.lat, currentCoordinate.lng];
+              }),
+            })
+          );
         } else {
           alert('Kaydedilmeye çalışırken bir hatayla karşılaşıldı');
         }
