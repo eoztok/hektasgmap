@@ -19,6 +19,16 @@ import './style.css';
 // This example requires the Drawing library. Include the libraries=drawing
 // parameter when you first load the API. For example:
 // <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=drawing">
+var mode = 'create';
+var currentCoordinates = [];
+var map;
+var drawingManager;
+var defaultShape;
+var currentShape;
+var selectedShape;
+var colors = ['#1E90FF', '#FF1493', '#32CD32', '#FF8C00', '#4B0082'];
+var selectedColor;
+var colorButtons = {};
 
 function initMap(): void {
   const map = new google.maps.Map(
@@ -52,4 +62,12 @@ function initMap(): void {
 
   drawingManager.setMap(map);
 }
+
+function clearSelection() {
+  if (selectedShape) {
+    selectedShape.setEditable(false);
+    selectedShape = null;
+  }
+}
+
 export { initMap };
